@@ -1,23 +1,7 @@
-import puppeteer from 'puppeteer';
+import { PdfGateway } from './gateways/pdf.gateway';
 
-export async function generatePdf(): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    pipe: true,
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-
-  const page = await browser.newPage();
-
-  await page.setContent(`<span>Hello</span>`, { waitUntil: 'networkidle0' });
-  await page.emulateMediaType('screen');
-
-  const pdf = await page.pdf({
-    format: 'a4',
-    printBackground: true
-  });
-
-  await browser.close();
+export async function generatePdf(pdfGateway: PdfGateway): Promise<Buffer> {
+  const pdf = await pdfGateway.generatePage(`<span>Hello</span>`);
 
   return pdf;
 }
