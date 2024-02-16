@@ -1,0 +1,47 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "ignorePatterns": "/dist",
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:prettier/recommended", "prettier"],
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "plugins": ["@typescript-eslint", "import"],
+  "rules": {
+    "curly": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-unused-vars": "off",
+    "require-await": "off",
+    "object-shorthand": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "import/no-default-export": "off",
+    "import/no-dynamic-require": "error",
+    "import/first": "error",
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always"
+      }
+    ],
+    "prettier/prettier": [
+      "warn",
+      {
+        "singleQuote": true
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"],
+        "extensions": [".js", ".ts"]
+      }
+    }
+  }
+}

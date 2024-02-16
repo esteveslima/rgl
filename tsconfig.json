@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2021",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "preserveConstEnums": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "allowUmdGlobalAccess": true,
+    "skipLibCheck": true,
+    "outDir": "./dist"
+  },
+  "include": ["*.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/typings/*", "**/*.test.ts",  "**/*.spec.ts"]
+}
