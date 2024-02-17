@@ -1,39 +1,43 @@
 import puppeteer, { Browser } from 'puppeteer';
 
+export interface PdfGatewayConfig {
+  generatorsPoolSize: number;
+}
+
 export class PdfGateway {
-  private static instance: PdfGateway;
-  private static instancesNumber = 0;
-  private puppeteerBrowserInstance: Browser;
+  private puppeteerBrowsersPool: Browser[] = [];
+  private browsersPoolRoundRobinCounter = 0;
 
-  private constructor(puppeteerBrowserInstance: Browser) {
-    this.puppeteerBrowserInstance = puppeteerBrowserInstance;
+  private constructor(puppeteerBrowsersPool: Browser[]) {
+    this.puppeteerBrowsersPool = puppeteerBrowsersPool;
   }
 
-  private static async initInstance(): Promise<void> {
-    const browser = await puppeteer.launch({
-      pipe: true,
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+  public static async build(config: PdfGatewayConfig): Promise<PdfGateway> {
+    const poolSize = config.generatorsPoolSize > 0 ? config.generatorsPoolSize : 1;
 
-    const instance = new PdfGateway(browser);
-    PdfGateway.instance = instance;
-    console.log(`Intialized PdfGateway instance number ${++PdfGateway.instancesNumber}`);
-  }
+    const browsersPool = await Promise.all(
+      Array.from(Array(poolSize)).map(() =>
+        puppeteer.launch({
+          pipe: true,
+          headless: 'new',
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        })
+      )
+    );
+    console.log(`Browsers created: ${poolSize}`);
 
-  public static async getInstance(): Promise<PdfGateway> {
-    const isInitialized = Boolean(PdfGateway.instance);
-    if (!isInitialized) {
-      await this.initInstance();
-    }
-
-    return PdfGateway.instance;
+    return new PdfGateway(browsersPool);
   }
 
   //
 
   public async generatePage(content: string): Promise<Buffer> {
-    const page = await this.puppeteerBrowserInstance.newPage();
+    const roundRobinBrowserIndex = this.browsersPoolRoundRobinCounter % (this.puppeteerBrowsersPool.length || 1);
+    this.browsersPoolRoundRobinCounter++;
+    console.log(`Using browser n#${roundRobinBrowserIndex}`);
+
+    const browser = this.puppeteerBrowsersPool[roundRobinBrowserIndex];
+    const page = await browser.newPage();
 
     await Promise.all([page.setContent(content, { waitUntil: 'networkidle0' }), page.emulateMediaType('screen')]);
 
@@ -41,6 +45,8 @@ export class PdfGateway {
       format: 'a4',
       printBackground: true
     });
+
+    page.close(); // not awaiting to save time
 
     return pdf;
   }
